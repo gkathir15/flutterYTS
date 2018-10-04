@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'MoviesResponse.dart';
 void main() {
   runApp(new MaterialApp(
     home: new MyGetHttpData(),
@@ -18,28 +18,41 @@ class MyGetHttpData extends StatefulWidget {
 // Create the state for our stateful widget
 class MyGetHttpDataState extends State<MyGetHttpData> {
   final String url = "https://yts.am/api/v2/list_movies.json";
-  List data;
+  MoviesResponse data;
 
   // Function to get the JSON data
-  Future<String> getJSONData() async {
-    var response = await http.get(
-      // Encode the url
-        Uri.encodeFull(url),
-        // Only accept JSON response
-        headers: {"Accept": "application/json"});
+//  Future<String> getJSONData() async {
+//    var response = await http.get(
+//      // Encode the url
+//        Uri.encodeFull(url),
+//        // Only accept JSON response
+//        headers: {"Accept": "application/json"});
+//
+//    // Logs the response body to the console
+//    print(response.body);
+//
+//    // To modify the state of the app, use this method
+//    setState(() {
+//      // Get the JSON data
+//      var dataConvertedToJSON = JSON.decode(response.body);
+//      // Extract the required part and assign it to the global variable named data
+//      data = dataConvertedToJSON['movies'];
+//    });
+//
+//    return "Successfull";
+//  }
 
-    // Logs the response body to the console
-    print(response.body);
+  Future<MoviesResponse> fetchMovies() async {
+    final response =
+    await http.get(url);
 
-    // To modify the state of the app, use this method
-    setState(() {
-      // Get the JSON data
-      var dataConvertedToJSON = JSON.decode(response.body);
-      // Extract the required part and assign it to the global variable named data
-      data = dataConvertedToJSON['movies'];
-    });
+    return parsePhotos(response.body);
+  }
 
-    return "Successfull";
+  MoviesResponse parsePhotos(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+    return parsed.map<MoviesResponse>((json) => MoviesResponse.fromJson(json))
+        .toList();
   }
 
   @override
@@ -50,7 +63,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       ),
       // Create a Listview and load the data when available
       body: new ListView.builder(
-          itemCount: data == null ? 0 : data.length,
+          itemCount: data == null ? 0 : data.data.,
           itemBuilder: (BuildContext context, int index) {
             return new Container(
               child: new Center(
@@ -83,6 +96,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
     super.initState();
 
     // Call the getJSONData() method when the app initializes
-    this.getJSONData();
+    data = this.fetchMovies();
   }
 }
